@@ -16,7 +16,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.test.model.entity.User;
+import com.test.util.ActivityCollectorUtil;
 import com.test.util.OkHttpRequest;
 
 import java.io.IOException;
@@ -32,10 +34,27 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sp = getSharedPreferences("loginInfo", MODE_PRIVATE);
+        boolean isSignedIn = sp.getBoolean("isSignedIn", false);
+        if(isSignedIn)
+        {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+
         setContentView(R.layout.activity_login);
         //设置此界面为竖屏
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         init();
+
+        ActivityCollectorUtil.addActivity(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollectorUtil.removeActivity(this);
     }
 
     private void init() {
@@ -87,6 +106,8 @@ public class LoginActivity extends AppCompatActivity {
                                 editor.apply();
                                 //登录成功后关闭此页面进入主页
                                 LoginActivity.this.finish();
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
                             } else {
                                 Toast.makeText(LoginActivity.this, "用户名或者密码有误", Toast.LENGTH_SHORT).show();
                             }
@@ -113,10 +134,15 @@ public class LoginActivity extends AppCompatActivity {
                 String requestUrl = SERVER_URL + ":" + SEVER_PORT + "/user/login";
                 try {
                     message.obj = OkHttpRequest.post(requestUrl, json);
-                    System.out.println(message.obj.toString()+555);
                 } catch (IOException e) {
                     message.obj = "false";
                 }
+                String response = (String) message.obj;
+                JSONObject responseJson = JSON.parseObject(response);
+                String result = responseJson.getString("loginStatus");
+                message.obj = result;
+                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("fan_data", 0);
+                sharedPreferences.edit().putString("username", responseJson.getString(userName)).apply();
                 handler.sendMessage(message);
             }
         }).start();
