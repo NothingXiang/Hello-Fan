@@ -43,9 +43,9 @@ public class SyncHelper {
             public void run() {
                 // 上传SharedPreferences
                 SharedPreferences sharedPreferences = context.getSharedPreferences("fan_data", 0);
-                SimpleDateFormat sdf = new SimpleDateFormat("YYYY-mm-dd hh:mm:ss");
-                String updateTime = sdf.format(new Date());
-                sharedPreferences.edit().putString("updateTime", updateTime).apply();
+//                SimpleDateFormat sdf = new SimpleDateFormat("YYYY-mm-dd hh:mm:ss");
+//                String updateTime = sdf.format(new Date());
+//                sharedPreferences.edit().putString("updateTime", updateTime).apply();
 
                 String lastLearnDate = sharedPreferences.getString("last_learn_date", "");
                 int currentWord = sharedPreferences.getInt("current_word", 0);
@@ -85,7 +85,7 @@ public class SyncHelper {
                         plan.setLearnTimes(cursor.getInt(cursor.getColumnIndex("learnTimes")));
                         plan.setUserName(username);
                         String nextDate = cursor.getString(cursor.getColumnIndex("nextDate"));
-                        if (nextDate != null) {
+                        if (nextDate != null && !nextDate.equals("null")) {
                             plan.setNextDate(format.parse(nextDate));
                         }
                         plan.setEfactor(cursor.getDouble(cursor.getColumnIndex("eFactor")));
