@@ -17,10 +17,16 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.android.material.navigation.NavigationView;
+import com.roger.catloadinglibrary.CatLoadingView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 import com.test.util.ActivityCollectorUtil;
+import com.test.util.OkHttpRequest;
 
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -31,12 +37,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.test.util.Constant.SERVER_URL;
+import static com.test.util.Constant.SEVER_PORT;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -58,7 +68,6 @@ public class MainActivity extends AppCompatActivity
         boolean loginStatus = sp.getBoolean("loginStatus", false);
         if(!loginStatus)
         {
-            ActivityCollectorUtil.addActivity(this);
             goToLoginActivity();
         }
         super.onCreate(savedInstanceState);
@@ -79,6 +88,16 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+        ImageView iconImageView = headerView.findViewById(R.id.iconImageView);
+        iconImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, UserInfoActivity.class);
+                startActivity(intent);
+            }
+        });
 
         if (!(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) ||
                 !(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
@@ -110,6 +129,7 @@ public class MainActivity extends AppCompatActivity
             setDefaultFragment(prePos);
         }
         updateDrawerInfo();
+        ActivityCollectorUtil.addActivity(this);
     }
 
     @Override
@@ -211,7 +231,7 @@ public class MainActivity extends AppCompatActivity
             switchFragment(HISTORY);
         }
         else if (id == R.id.nav_setting) {
-            Intent intent = new Intent(MainActivity.this, UserInfoActivity.class);
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
         }
 
@@ -253,6 +273,13 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
         ImageView iconImageView = headerView.findViewById(R.id.iconImageView);
+        iconImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, UserInfoActivity.class);
+                startActivity(intent);
+            }
+        });
         TextView nicknameTextView = headerView.findViewById(R.id.nicknameTextView);
         Picasso.get().load("https://avatars3.githubusercontent.com/u/30856589?s=460&v=4").transform(new CircleTransform()).into(iconImageView);
         nicknameTextView.setText("你好繁");
